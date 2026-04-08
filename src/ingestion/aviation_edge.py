@@ -10,6 +10,7 @@ def fetch_flight_history(api_key, airport_code, flight_types, start_date, end_da
         current = start_date
         while current < end_date:
             next_date = min(current + interval, end_date)
+            print(f"Starting data collection from {current.date()} to {next_date.date()}.")
 
             params = {
                 "key": api_key,
@@ -19,12 +20,15 @@ def fetch_flight_history(api_key, airport_code, flight_types, start_date, end_da
                 "date_to": next_date.strftime("%Y-%m-%d"),
             }
 
-            response = requests.get(url, params=params)
-            response.raise_for_status()
-            data = response.json()
-
-            if isinstance(data, list):
+            try:
+                print(f"Fetching data- {flight_type} for: {current.date()} to {next_date.date()}")
+                response = requests.get(url, params=params)
+                response.raise_for_status()
+                data = response.json()
                 all_records.extend(data)
+
+            except Exception as e:
+                print(f"Error fetching data for {flight_type} from {current.date()} to {next_date.date()}: {e}")
 
             current = next_date
 
