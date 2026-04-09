@@ -52,7 +52,7 @@ def insert_to_clickhouse(consumer_instance, table_name, client, column_names, de
           row.append(cs_item.get('airline', {}))
           row.append(cs_item.get('flight', {}))
 
-        case 'historical_weather_data':
+        case 'raw_hist_weather_data':
           weather_time = row_item.get('dt', 0)
           row = [row_item.get(col, defaults[col]) for col in column_names[1:]]
           row.insert(0, weather_time)
