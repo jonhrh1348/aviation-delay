@@ -5,7 +5,6 @@ import json
 import os
 from kafka import KafkaProducer, KafkaConsumer, KafkaAdminClient, TopicPartition
 
-# Configuration for Kafka
 def get_env_var(name: str) -> str:
     value = os.getenv(name)
     if not value:
@@ -86,11 +85,15 @@ def insert_to_clickhouse(consumer_instance, table_name, client, column_names, de
 
       # Batch insert every 500 records
       if len(batch) >= 500:
-          client.insert(table_name, batch, column_names=column_names)
-          print(f"Successfully inserted {len(batch)} records to ClickHouse.")
-          batch = []
+          # client.insert(table_name, batch, column_names=column_names)
+        print('Placeholder insert to ClickHouse')
+
+        print(f"Successfully inserted {len(batch)} records to ClickHouse.")
+        batch = []
 
     # Final insert for remaining records
     if batch:
-        client.insert(table_name, batch, column_names=column_names)
+        # client.insert(table_name, batch, column_names=column_names)
+        print('End of to ClickHouse')
+
         print(f"Successfully inserted {len(batch)} remaining records to ClickHouse.")
