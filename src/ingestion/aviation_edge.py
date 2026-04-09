@@ -30,6 +30,6 @@ def fetch_flight_history(api_key, airport_code, flight_types, start_date, end_da
             except Exception as e:
                 print(f"Error fetching data for {flight_type} from {current.date()} to {next_date.date()}: {e}")
 
-            current = next_date
+            current = next_date + datetime.timedelta(days=1)
 
     return all_records
