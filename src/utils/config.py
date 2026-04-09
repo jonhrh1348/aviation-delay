@@ -1,9 +1,6 @@
 # src/utils/config.py
 import clickhouse_connect
-import csv
-import json
 import os
-from kafka import KafkaProducer, KafkaConsumer, KafkaAdminClient, TopicPartition
 
 def get_env_var(name: str) -> str:
     value = os.getenv(name)
@@ -22,78 +19,41 @@ def setup_clickhouse_client(username, password, host):
         secure=True
     )
 
-# Kafka Producer
-def create_kafka_producer(client_id, bootstrap_servers):
-  return KafkaProducer(
-    bootstrap_servers=bootstrap_servers,
-    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-    client_id=client_id
-  )
-
-# Kafka Consumer
-def create_kafka_consumer(group_id, bootstrap_servers, topic_name):
-  return KafkaConsumer(
-      topic_name,
-      bootstrap_servers=bootstrap_servers,
-      group_id=group_id,
-      value_deserializer=lambda x: json.loads(x.decode('utf-8')),
-      consumer_timeout_ms=10000
-  )
-
-# Streaming function
-def stream_to_kafka(data_csv, producer, topic_name): 
-    print(f"Starting data streaming to Kafka with producer client_id: {producer.config['client_id']}")
+def create_table_if_not_exists(client, table_name, schema, engine= "MergeTree()"):
+    """
+    Create a ClickHouse table if it doesn't exist.
     
-    record_count = 0
-    # Open the CSV file in read mode
-    with open(data_csv, mode='r', encoding='utf-8') as file:
-        csv_reader = csv.DictReader(file)
-        
-        for record in csv_reader:
-            producer.send(topic_name, record)
-            record_count += 1
-            
-    producer.flush()
-    print(f"Sent {record_count} records from CSV to Kafka topic: {topic_name}")
+    Args:
+        client: ClickHouse client instance
+        table_name: Name of the table to create
+        schema: Dictionary mapping column names to their definitions
+        engine: Storage engine (default: MergeTree)
+    
+    Returns:
+        bool: True if table was created, False if it already existed
+    """
+    
+    try:
+        client.command(f"DROP TABLE IF EXISTS {table_name} SYNC")
+    except Exception as e:
+        print(f"Warning: Could not drop existing table: {e}")
+        raise
+    
+    # Build column definitions
+    columns = ",\n    ".join([f"{col} {defn}" for col, defn in schema.items()])
+    
+    # Build and execute CREATE TABLE statement
+    create_sql = f"""
+        CREATE TABLE IF NOT EXISTS {table_name} (
+            {columns}
+        ) ENGINE = {engine}
+        PRIMARY KEY (id);
+    """
+    
+    try:
+        client.command(create_sql)
+        print(f"Table '{table_name}' created successfully.")
 
-
-# Inject into clickhouse after kafka producer reads it
-def insert_to_clickhouse(consumer_instance, table_name, client, column_names, defaults):
-    print(f"Starting consumption of data from Kafka with consumer_instance: {consumer_instance.config['group_id']}")
-    batch= []
-
-    for message in consumer_instance:
-      row_item = message.value
-
-      match table_name:
-        case 'raw_aviation_flights':
-          row = [row_item.get(col, defaults[col]) for col in column_names[:6]]
-          cs_item = row_item.get('codeshared', {})
-          row.append(cs_item.get('airline', {}))
-          row.append(cs_item.get('flight', {}))
-
-        case 'historical_weather_data':
-          weather_time = row_item.get('dt', 0)
-          row = [row_item.get(col, defaults[col]) for col in column_names[1:]]
-          row.insert(0, weather_time)
-
-        case _:
-          print (f'{table_name} is not found in database')
-          continue
-
-      batch.append(row)
-
-      # Batch insert every 500 records
-      if len(batch) >= 500:
-          # client.insert(table_name, batch, column_names=column_names)
-        print('Placeholder insert to ClickHouse')
-
-        print(f"Successfully inserted {len(batch)} records to ClickHouse.")
-        batch = []
-
-    # Final insert for remaining records
-    if batch:
-        # client.insert(table_name, batch, column_names=column_names)
-        print('End of to ClickHouse')
-
-        print(f"Successfully inserted {len(batch)} remaining records to ClickHouse.")
+    except Exception as e:
+        print(f"Error creating table '{table_name}': {e}")
+        raise
