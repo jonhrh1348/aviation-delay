@@ -1,6 +1,6 @@
 import csv
 import json
-from kafka import KafkaProducer, KafkaConsumer, KafkaAdminClient, TopicPartition
+from kafka import KafkaProducer, KafkaConsumer
 from src.utils.helper import process_rows
 
 # Kafka Producer
