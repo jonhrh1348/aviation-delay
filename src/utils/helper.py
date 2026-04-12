@@ -79,9 +79,19 @@ def process_rows(table_name, row_item, column_names, defaults):
           "cloudiness_pct": safe_get(row_item, "clouds", "all", default_value=-100),
           "rain_1h": safe_get(row_item, "rain", "1h", default_value=0.00),
           "rain_3h": safe_get(row_item, "rain", "3h", default_value=0.00),
-          "weather_main": [w.get("main") for w in row_item.get("weather", []) if w.get("main")] if row_item.get("weather") else [],
-          "weather_desc": [w.get("description") for w in row_item.get("weather", []) if w.get("description")] if row_item.get("weather") else [],
-      }
+        }
+
+        weather_items = row_item.get("weather", [])
+        if weather_items:
+            for w in weather_items:
+              row_obj = row_obj.copy()
+              row_obj["weather_main"] = w.get("main", "")
+              row_obj["weather_desc"] = w.get("description", "")
+
+        else:
+          row_obj = row_obj.copy()
+          row_obj["weather_main"] = ""
+          row_obj["weather_desc"] = ""
 
       case _:
         print (f'{table_name} is not found in database')
