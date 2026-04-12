@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+import decimal
+import uuid
 
 def safe_get(obj, *path, default_value=None):
     for key in path:
@@ -7,6 +9,16 @@ def safe_get(obj, *path, default_value=None):
         else:
             return default_value
     return obj
+
+def convert_row(row):
+    return [
+        x.isoformat() if isinstance(x, datetime)
+        else float(x) if isinstance(x, decimal.Decimal)
+        else str(x) if isinstance(x, uuid.UUID) 
+        else ','.join(map(str, x)) if isinstance(x, list)
+        else x
+        for x in row
+    ]
 
 def get_actual_time(row_item, time_type):
     """Calculate actual time by adding delay mins to scheduled time if actual time is missing."""
