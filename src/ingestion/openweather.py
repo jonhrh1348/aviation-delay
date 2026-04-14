@@ -34,3 +34,40 @@ def fetch_weather_history(api_key, lat, lon, start_date, end_date, interval_days
         current = next_date
 
     return all_records
+
+def fetch_forecasted_weather_data(api_key, lat, lon): 
+    url = 'https://pro.openweathermap.org/data/2.5/forecast/hourly'
+    params = {
+        "lat": lat,
+        "lon": lon,
+        "appid": api_key,
+        "units": "metric"
+    }
+
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
+        all_records = data['list']
+    except Exception as e:
+        print(f'Error fetching data from current hour weather API: {e}')
+    
+    return all_records
+
+def current_hour_weather_data(api_key, lat, lon):
+    url = 'https://api.openweathermap.org/data/2.5/weather'
+    params = {
+        "lat": lat,
+        "lon": lon,
+        "appid": api_key,
+        "units": "metric"
+    }
+
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
+    except Exception as e:
+        print(f'Error fetching data from current hour weather API: {e}')
+    
+    return data
