@@ -39,7 +39,7 @@ def stream_to_kafka(data_csv, producer, topic_name):
     print(f"Sent {record_count} records from CSV to Kafka topic: {topic_name}")
 
 # Inject into clickhouse after kafka producer reads it
-def insert_to_clickhouse(consumer_instance, table_name, client, column_names=None, defaults=None):
+def insert_to_clickhouse(consumer_instance, table_name, client, column_names=None, defaults=None, save_to_clickhouse=False):
     print(f"Starting consumption of data from Kafka with client_id: {consumer_instance.config['client_id']}")
     batch= []
 
@@ -49,12 +49,12 @@ def insert_to_clickhouse(consumer_instance, table_name, client, column_names=Non
         batch.append(row)
 
       # Batch insert every 500 records
-      if len(batch) >= 500:
+      if len(batch) >= 500 and save_to_clickhouse:
         client.insert(table_name, batch, column_names=column_names)
         print(f"Successfully inserted {len(batch)} records to ClickHouse.")
         batch = []
 
     # Final insert for remaining records
-    if batch:
+    if batch and save_to_clickhouse:
         client.insert(table_name, batch, column_names=column_names)
         print(f"Successfully inserted {len(batch)} remaining records to ClickHouse.")
