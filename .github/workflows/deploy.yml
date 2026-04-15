@@ -21,7 +21,7 @@ env:
   SAVE_TO_CLICKHOUSE: '${{ vars.SAVE_TO_CLICKHOUSE }}'
   DOCKER_REPOSITORY: '${{ vars.DOCKER_REPOSITORY }}'
   GAR_LOCATION: us-central1  
-  GCE_INSTANCE: aviation-kafka  
+  SERVICE_NAME: aviation-delay-git
   GCE_INSTANCE_ZONE: us-central1-a
   IMAGE_NAME: aviation-delay
 
@@ -75,8 +75,9 @@ jobs:
           docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest"
 
       # Deploy to GCE (Update existing container VM)
-      - name: Deploy to GCE
-        run: |-
-          gcloud compute instances update-container ${{ env.GCE_INSTANCE }} \
-            --zone ${{ env.GCE_INSTANCE_ZONE }} \
-            --container-image "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest"
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          region: ${{ env.GAR_LOCATION }}
+          image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
