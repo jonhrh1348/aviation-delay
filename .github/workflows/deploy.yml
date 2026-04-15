@@ -81,3 +81,12 @@ jobs:
           service: ${{ env.SERVICE_NAME }}
           region: ${{ env.GAR_LOCATION }}
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
+          env_vars: |
+            AE_API_KEY=${{ secrets.AE_API_KEY }}
+            WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}
+            CLICKHOUSE_HOST=${{ secrets.CLICKHOUSE_HOST }}
+            CLICKHOUSE_USER=${{ secrets.CLICKHOUSE_USER }}
+            CLICKHOUSE_PW=${{ secrets.CLICKHOUSE_PW }}
+            KAFKA_BOOTSTRAP_SERVERS=${{ secrets.KAFKA_BOOTSTRAP_SERVERS }}
+            SAVE_TO_CLICKHOUSE=${{ vars.SAVE_TO_CLICKHOUSE }}
+            DOCKER_REPOSITORY=${{ vars.DOCKER_REPOSITORY }}

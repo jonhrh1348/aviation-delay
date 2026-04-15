@@ -10,6 +10,8 @@ COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN chmod +x notebooks/run_all.sh
+
 EXPOSE 8080
 
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:8080"] 
+CMD ["bash", "notebooks/run_all.sh", "0.0.0.0:8080"]
