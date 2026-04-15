@@ -1,7 +1,7 @@
--e git+https://github.com/jonhrh1348/aviation-delay.git@f446a4a5453740f3db86878936837c9a2c85751f#egg=aviation_delay
 absl-py==2.4.0
 asttokens==3.0.1
 astunparse==1.6.3
+-e git+https://github.com/jonhrh1348/aviation-delay.git@52622cb66bc13e81cf9b09e2aa686f95b74aa2b5#egg=aviation_delay
 certifi==2026.2.25
 charset-normalizer==3.4.7
 clickhouse-connect==0.15.1
@@ -14,6 +14,7 @@ flatbuffers==25.12.19
 gast==0.7.0
 google-pasta==0.2.0
 grpcio==1.80.0
+gunicorn==25.3.0
 h5py==3.14.0
 idna==3.11
 ipykernel==7.2.0
