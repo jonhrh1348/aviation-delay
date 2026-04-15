@@ -2,7 +2,8 @@ FROM python:3.12-slim
 
 RUN apt-get update && apt-get install -y \
     git \
-    openjdk-17-jdk \
+    openjdk-17-jdk-headless \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 ENV JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
