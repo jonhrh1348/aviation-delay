@@ -11,3 +11,7 @@ jupyter nbconvert --to notebook --execute notebooks/04_weather_processing.ipynb 
 jupyter nbconvert --to notebook --execute notebooks/05_prediction_delay.ipynb --output-dir=notebooks/
 
 echo "All notebooks executed successfully!"
+
+echo "Starting server..."
+PORT=${PORT:-8080}
+python -m http.server $PORT --bind 0.0.0.0
